@@ -11,28 +11,11 @@ import SwiftUI
 
 class StartScene: SKScene {
     
-    var splashScreen: SKSpriteNode
-    var unscrambleLabel: SKLabelNode
-    var colorsLabel: SKLabelNode
+    var splashScreen: SKSpriteNode = SKSpriteNode(imageNamed: "unscramble")
+    var unscrambleLabel: SKLabelNode = SKLabelNode()
+    var colorsLabel: SKLabelNode = SKLabelNode()
 
-    var backColor: UIColor
-    
-    override init(size: CGSize) {
-
-        backColor = UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.0)
-        
-        splashScreen = SKSpriteNode(imageNamed: "unscramble")
-        unscrambleLabel = SKLabelNode()
-        colorsLabel = SKLabelNode()
-        
-        super.init(size: size)
-    
-    }
-    required init?(coder aDecoder: NSCoder) {
-        
-        fatalError("init(coder:) has not been implemented")
-        
-    }
+    var backColor: SKColor = SKColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.0)
     
     override func didMove(to view: SKView) {
         
@@ -47,7 +30,7 @@ class StartScene: SKScene {
         unscrambleLabel.text = "Unscramble"
         unscrambleLabel.fontName = "Bold"
         unscrambleLabel.fontSize = 70
-        unscrambleLabel.fontColor = SKColor.white
+        unscrambleLabel.fontColor = .white
         unscrambleLabel.horizontalAlignmentMode = .center
         unscrambleLabel.position = CGPoint(x: size.width/2,
                                      y: size.height * 0.20 )
@@ -57,7 +40,7 @@ class StartScene: SKScene {
         colorsLabel.text = "Colors"
         colorsLabel.fontName = "Bold"
         colorsLabel.fontSize = 70
-        colorsLabel.fontColor = SKColor.white
+        colorsLabel.fontColor = .white
         colorsLabel.horizontalAlignmentMode = .center
         colorsLabel.position = CGPoint(x: size.width/2,
                                      y: size.height * 0.12 )

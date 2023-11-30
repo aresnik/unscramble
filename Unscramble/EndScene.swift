@@ -11,38 +11,16 @@ import SwiftUI
 
 class EndScene: SKScene {
     
-    var gameOverLabel: SKLabelNode
-    var timeLabel: SKLabelNode
-    var movesLabel: SKLabelNode
-    var bestLabel: SKLabelNode
-    var movesBestLabel: SKLabelNode
-    var timeBestLabel: SKLabelNode
-    var playAgainButton: SKLabelNode
-    var playAgainBoarder: SKShapeNode
+    var gameOverLabel: SKLabelNode = SKLabelNode()
+    var timeLabel: SKLabelNode = SKLabelNode()
+    var movesLabel: SKLabelNode = SKLabelNode()
+    var bestLabel: SKLabelNode = SKLabelNode()
+    var movesBestLabel: SKLabelNode = SKLabelNode()
+    var timeBestLabel: SKLabelNode = SKLabelNode()
+    var playAgainButton: SKLabelNode = SKLabelNode()
+    var playAgainBoarder: SKShapeNode  = SKShapeNode()
     
-    var backColor: UIColor
-    
-    override init(size: CGSize) {
-        
-        gameOverLabel = SKLabelNode()
-        timeLabel = SKLabelNode()
-        movesLabel = SKLabelNode()
-        bestLabel = SKLabelNode()
-        movesBestLabel = SKLabelNode()
-        timeBestLabel = SKLabelNode()
-        playAgainButton = SKLabelNode()
-        playAgainBoarder = SKShapeNode()
-        
-        backColor = UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.0)
-        
-        super.init(size: size)
-    
-    }
-    required init?(coder aDecoder: NSCoder) {
-        
-        fatalError("init(coder:) has not been implemented")
-        
-    }
+    var backColor: SKColor = SKColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.0)
     
     override func didMove(to view: SKView) {
         
@@ -51,7 +29,7 @@ class EndScene: SKScene {
         gameOverLabel.text = "Game Over"
         gameOverLabel.fontName = "Bold"
         gameOverLabel.fontSize = 50
-        gameOverLabel.fontColor = SKColor.white
+        gameOverLabel.fontColor = .white
         gameOverLabel.horizontalAlignmentMode = .center
         gameOverLabel.position = CGPoint(x: size.width/2,
                                          y: size.height - long)
@@ -62,7 +40,7 @@ class EndScene: SKScene {
         timeLabel.text = "Time: \(timeCurrent)"
         timeLabel.fontName = "Bold"
         timeLabel.fontSize = 25
-        timeLabel.fontColor = SKColor.white
+        timeLabel.fontColor = .white
         timeLabel.horizontalAlignmentMode = .left
         timeLabel.position = CGPoint(x: size.width*0.1 ,
                                      y: size.height*0.65 )
@@ -73,7 +51,7 @@ class EndScene: SKScene {
         movesLabel.text = "Moves: \(movesCurrent)"
         movesLabel.fontName = "Bold"
         movesLabel.fontSize = 25
-        movesLabel.fontColor = SKColor.white
+        movesLabel.fontColor = .white
         movesLabel.horizontalAlignmentMode = .left
         movesLabel.position = CGPoint(x: size.width*0.6,
                                      y: size.height*0.65 )
@@ -84,7 +62,7 @@ class EndScene: SKScene {
         bestLabel.text = "Best:"
         bestLabel.fontName = "Bold"
         bestLabel.fontSize = 25
-        bestLabel.fontColor = SKColor.white
+        bestLabel.fontColor = .white
         bestLabel.horizontalAlignmentMode = .center
         bestLabel.position = CGPoint(x: self.size.width/2,
                                      y: self.size.height*0.55 )
@@ -95,7 +73,7 @@ class EndScene: SKScene {
         movesBestLabel.text = "Time: \(timeBest)"
         movesBestLabel.fontName = "Bold"
         movesBestLabel.fontSize = 25
-        movesBestLabel.fontColor = SKColor.white
+        movesBestLabel.fontColor = .white
         movesBestLabel.horizontalAlignmentMode = .left
         movesBestLabel.position = CGPoint(x: size.width*0.1,
                                           y: size.height*0.45 )
@@ -106,7 +84,7 @@ class EndScene: SKScene {
         timeBestLabel.text = "Moves: \(movesBest)"
         timeBestLabel.fontName = "Bold"
         timeBestLabel.fontSize = 25
-        timeBestLabel.fontColor = SKColor.white
+        timeBestLabel.fontColor = .white
         timeBestLabel.horizontalAlignmentMode = .left
         timeBestLabel.position = CGPoint(x: size.width*0.6,
                                      y: size.height*0.45 )
@@ -117,7 +95,7 @@ class EndScene: SKScene {
         playAgainButton.text = "Play Again"
         playAgainButton.fontName = "Bold"
         playAgainButton.fontSize = 25
-        playAgainButton.fontColor = SKColor.white
+        playAgainButton.fontColor = .white
         playAgainButton.horizontalAlignmentMode = .center
         playAgainButton.position = CGPoint(x: Int(size.width/2), y: Int(size.height*0.3 - 80))
         playAgainButton.name = "playagian"

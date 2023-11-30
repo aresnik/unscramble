@@ -18,39 +18,41 @@ var timeBest: String = ""
 
 class GameScene: SKScene {
     
-    private var timeLabel: SKLabelNode
-    private var movesLabel: SKLabelNode
-    private var winLabel: SKLabelNode
-    private var okButton: SKLabelNode
-    private var okBoarder: SKShapeNode
+    private var timeLabel: SKLabelNode = SKLabelNode()
+    private var movesLabel: SKLabelNode = SKLabelNode()
+    private var winLabel: SKLabelNode = SKLabelNode()
+    private var okButton: SKLabelNode = SKLabelNode()
+    private var okBoarder: SKShapeNode = SKShapeNode()
     
-    private let clr: [SKColor]
-    private var color: [SKColor]
+    private let clr: [SKColor] = [ .white, .blue, .red, .green, .orange, .yellow, .clear ]
+    private var color: [SKColor] = [SKColor]()
     
-    private var tile: [SKShapeNode]
-    private var tilePosition: [CGPoint]
-    private var overlay: [SKShapeNode]
-    private var popOver: SKShapeNode
+    private var tile: [SKShapeNode] = [SKShapeNode]()
+    private var tilePosition: [CGPoint] = [CGPoint]()
+    private var overlay: [SKShapeNode] = [SKShapeNode]()
+    private var popOver: SKShapeNode = SKShapeNode()
     
-    private var backColor: SKColor
+    private var backColor: SKColor = SKColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.0)
     
     private let cols: Int = 6
     private let rows: Int = 9
+    private let numberOfTiles: Int = 54
     private let w: Int = 55
     private let h: Int = 55
     private let pos: CGFloat = 60
     
-    private var soundPlayer: AVAudioPlayer = AVAudioPlayer()
+    private var soundPlayer: AVAudioPlayer? = AVAudioPlayer()
     
     private var time: String = "00:00:00"
     private var moves: Int = 0
     private var timer: Timer = Timer()
     private var elapsed: Int = 0
     private var elapsedBest: Int = 0
+    private var once: Bool = false
     
-    override init(size: CGSize) {
+    override func didMove(to view: SKView) {
         
-        clr = [ .white, .blue, .red, .green, .orange, .yellow, .clear ]
+        backgroundColor = backColor
         
         color =  [ clr[0], clr[0], clr[0], clr[1], clr[1], clr[1],
                    clr[0], clr[0], clr[0], clr[1], clr[1], clr[1],
@@ -62,39 +64,13 @@ class GameScene: SKScene {
                    clr[4], clr[4], clr[4], clr[5], clr[5], clr[5],
                    clr[4], clr[4], clr[4], clr[5], clr[5], clr[6] ]
         
-        backColor = SKColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.0)
-        
-        tile = [SKShapeNode]()
-        tilePosition = [CGPoint]()
-        overlay = [SKShapeNode]()
-        popOver = SKShapeNode()
-        timeLabel = SKLabelNode()
-        movesLabel = SKLabelNode()
-        winLabel = SKLabelNode()
-        okButton = SKLabelNode()
-        okBoarder = SKShapeNode()
-        
-        super.init(size: size)
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        
-        fatalError("init(coder:) has not been implemented")
-        
-    }
-    
-    override func didMove(to view: SKView) {
-        
-        backgroundColor = backColor
-        
         load()
         tiles()
-        shuffleBoard()
         
         timeLabel.text = "Time: \(time)"
         timeLabel.fontName = "Bold"
         timeLabel.fontSize = 20
-        timeLabel.fontColor = SKColor.white
+        timeLabel.fontColor = .white
         timeLabel.horizontalAlignmentMode = .left
         timeLabel.position = CGPoint(x: tile[0].position.x + 5,
                                      y: tile[0].position.y + pos)
@@ -105,14 +81,26 @@ class GameScene: SKScene {
         movesLabel.text = "Moves: \(moves)"
         movesLabel.fontName = "Bold"
         movesLabel.fontSize = 20
-        movesLabel.fontColor = SKColor.white
+        movesLabel.fontColor = .white
         movesLabel.horizontalAlignmentMode = .left
         movesLabel.position = CGPoint(x: size.width/2,
                                       y: tile[0].position.y + pos)
         movesLabel.name = "moves"
         
         addChild(movesLabel)
+
         
+    }
+    override func update(_ currentTime: TimeInterval) {
+        if !once {
+            let seconds = 1.0
+            DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
+                self.shuffleBoard()
+                self.moves = 0
+                self.elapsedTime()
+            }
+            once = true
+        }
     }
     
     func popOverDialogue() {
@@ -129,10 +117,10 @@ class GameScene: SKScene {
         winLabel.text = "SOLVED!"
         winLabel.fontName = "Bold"
         winLabel.fontSize = 20
-        winLabel.fontColor = SKColor.white
+        winLabel.fontColor = .white
         winLabel.horizontalAlignmentMode = .center
         winLabel.position = CGPoint(x: Int(self.size.width/2), 
-                                    y: Int(self.size.height/2 + 50))
+                                    y: Int(self.size.height/2 + 40))
         winLabel.zPosition = 4
         winLabel.name = "solved"
         
@@ -141,7 +129,7 @@ class GameScene: SKScene {
         okButton.text = "OK"
         okButton.fontName = "Bold"
         okButton.fontSize = 20
-        okButton.fontColor = SKColor.white
+        okButton.fontColor = .white
         okButton.horizontalAlignmentMode = .center
         okButton.position = CGPoint(x: Int(self.size.width/2),
                                     y: Int(self.size.height/2 - 60))
@@ -171,7 +159,7 @@ class GameScene: SKScene {
             let pointOfTouch = touch.location(in: self)
             let touchedNode = self.atPoint(pointOfTouch)
             
-            for i in 0..<54 {
+            for i in 0..<numberOfTiles {
                 if touchedNode == overlay[i] && !isSolved() {
                     move(i: i)
                 }
@@ -184,8 +172,8 @@ class GameScene: SKScene {
             }
             
             if touchedNode.name == "okboarder" {
-                okButton.fontColor = SKColor.gray
-                okBoarder.strokeColor = SKColor.gray
+                okButton.fontColor = .gray
+                okBoarder.strokeColor = .gray
             }
         }
     }
@@ -198,8 +186,8 @@ class GameScene: SKScene {
             let touchedNode = self.atPoint(pointOfTouch)
             
             if touchedNode.name == "okboarder" {
-                okButton.fontColor = SKColor.white
-                okBoarder.strokeColor = SKColor.white
+                okButton.fontColor = .white
+                okBoarder.strokeColor = .white
                 
                  changeScene()
             }
@@ -220,7 +208,7 @@ class GameScene: SKScene {
         var x = rect.minX
         var y = rect.maxY
         
-        for i in 0..<54 {
+        for i in 0..<numberOfTiles {
             
             tile.append(SKShapeNode(rect: CGRect(x: 0, y: 0, width: w, height: h)))
             overlay.append(SKShapeNode(rect: CGRect(x: 0, y: 0, width: w, height: h)))
@@ -285,12 +273,22 @@ class GameScene: SKScene {
     }
     
     func shuffleBoard() {
-        color.shuffle()
-        for i in 0..<54 {
-            tile[i].fillColor = color[i]
+        for _ in 0..<100000 {
+            let i = Int.random(in: 0..<numberOfTiles)
+            let empty: Int = findEmpty()
+            let emptyCol: Int = empty % cols
+            let emptyRow: Int = empty / cols
+            
+            // Double check valid move
+            if isNeighbor(i: i, x: emptyCol, y: emptyRow) {
+                animateSwap(fromIndex: i, toIndex: empty)
+            }
         }
-        moves = 0
-        elapsedTime()
+        
+//        color.shuffle()
+//        for i in 0..<numberOfTiles {
+//            tile[i].fillColor = color[i]
+//        }
     }
     
     func elapsedTime() {
@@ -321,9 +319,9 @@ class GameScene: SKScene {
         do {
             let url =  Bundle.main.url(forResource: "move", withExtension: "mp3")
             soundPlayer = try AVAudioPlayer(contentsOf: url!)
-            soundPlayer.volume = 0.2
-            soundPlayer.prepareToPlay()
-            soundPlayer.play()
+            soundPlayer?.volume = 0.2
+            soundPlayer?.prepareToPlay()
+            soundPlayer?.play()
         } catch let error {
             print(error.localizedDescription)
         }
@@ -333,9 +331,9 @@ class GameScene: SKScene {
         do {
             let url =  Bundle.main.url(forResource: "tada", withExtension: "mp3")
             soundPlayer = try AVAudioPlayer(contentsOf: url!)
-            soundPlayer.volume = 1.0
-            soundPlayer.prepareToPlay()
-            soundPlayer.play()
+            soundPlayer?.volume = 1.0
+            soundPlayer?.prepareToPlay()
+            soundPlayer?.play()
         } catch let error {
             print(error.localizedDescription)
         }
@@ -375,10 +373,6 @@ class GameScene: SKScene {
         
         // 6. Swap the colors in the 'color' array
         color.swapAt(fromIndex, toIndex)
-        
-        moves += 1
-        movesLabel.text = "Moves: \(moves)"
-        playSound()
     }
     
     // Swap two pieces
@@ -390,6 +384,9 @@ class GameScene: SKScene {
         // Double check valid move
         if isNeighbor(i: i, x: emptyCol, y: emptyRow) {
             animateSwap(fromIndex: i, toIndex: empty)
+            moves += 1
+            movesLabel.text = "Moves: \(moves)"
+            playSound()
         }
     }
     // Check if neighbor

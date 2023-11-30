@@ -11,8 +11,8 @@
 		462162E82966325900796FFE /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462162E72966325900796FFE /* GameScene.swift */; };
 		462162EA2966325900796FFE /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462162E92966325900796FFE /* GameViewController.swift */; };
 		462162ED2966325900796FFE /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 462162EB2966325900796FFE /* Main.storyboard */; };
-		462162EF2966325A00796FFE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 462162EE2966325A00796FFE /* Assets.xcassets */; };
 		462162F22966325A00796FFE /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 462162F02966325A00796FFE /* LaunchScreen.storyboard */; };
+		46B7C6512B0E93F500865D84 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 46B7C6502B0E93F500865D84 /* Assets.xcassets */; };
 		46E6AE462AEA952F00206D8A /* move.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 46E6AE452AEA952F00206D8A /* move.mp3 */; };
 		46E6AE482AEA96A700206D8A /* tada.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 46E6AE472AEA96A700206D8A /* tada.mp3 */; };
 		46E6AE4A2AEAC3C400206D8A /* StartScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46E6AE492AEAC3C400206D8A /* StartScene.swift */; };
@@ -25,8 +25,8 @@
 		462162E72966325900796FFE /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
 		462162E92966325900796FFE /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		462162EC2966325900796FFE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		462162EE2966325A00796FFE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		462162F12966325A00796FFE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		46B7C6502B0E93F500865D84 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		46C52D262AEBEC6000ED18D7 /* Unscramble.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Unscramble.entitlements; sourceTree = "<group>"; };
 		46E6AE452AEA952F00206D8A /* move.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = move.mp3; sourceTree = "<group>"; };
 		46E6AE472AEA96A700206D8A /* tada.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tada.mp3; sourceTree = "<group>"; };
@@ -71,7 +71,7 @@
 				462162E72966325900796FFE /* GameScene.swift */,
 				462162E92966325900796FFE /* GameViewController.swift */,
 				462162EB2966325900796FFE /* Main.storyboard */,
-				462162EE2966325A00796FFE /* Assets.xcassets */,
+				46B7C6502B0E93F500865D84 /* Assets.xcassets */,
 				46E6AE452AEA952F00206D8A /* move.mp3 */,
 				46E6AE472AEA96A700206D8A /* tada.mp3 */,
 				462162F02966325A00796FFE /* LaunchScreen.storyboard */,
@@ -140,8 +140,8 @@
 				462162ED2966325900796FFE /* Main.storyboard in Resources */,
 				46E6AE482AEA96A700206D8A /* tada.mp3 in Resources */,
 				46E6AE462AEA952F00206D8A /* move.mp3 in Resources */,
-				462162EF2966325A00796FFE /* Assets.xcassets in Resources */,
 				462162F22966325A00796FFE /* LaunchScreen.storyboard in Resources */,
+				46B7C6512B0E93F500865D84 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -322,7 +322,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.AlexanderResnik.UnscrambleColors;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -356,7 +356,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.AlexanderResnik.UnscrambleColors;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
