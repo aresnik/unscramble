@@ -79,7 +79,7 @@ class StartScene: SKScene {
 struct StartSceneView: View {
 
     var body: some View {
-        SpriteView(scene: StartScene(size:CGSize(width: gameWidth, height: gameHeight)))
+        SpriteView(scene: StartScene(size: CGSize(width: gameWidth, height: gameHeight)))
             .ignoresSafeArea()
     }
 }

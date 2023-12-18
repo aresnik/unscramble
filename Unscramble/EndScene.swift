@@ -8,6 +8,7 @@
 import SpriteKit
 import GameplayKit
 import SwiftUI
+import GameKit
 
 class EndScene: SKScene {
     
@@ -28,12 +29,12 @@ class EndScene: SKScene {
         
         gameOverLabel.text = "Game Over"
         gameOverLabel.fontName = "Bold"
-        gameOverLabel.fontSize = 50
+        gameOverLabel.fontSize = 45
         gameOverLabel.fontColor = .white
         gameOverLabel.horizontalAlignmentMode = .center
         gameOverLabel.position = CGPoint(x: size.width/2,
                                          y: size.height - long)
-        gameOverLabel.name = "gameover"
+        gameOverLabel.name = "gameoverlabel"
         
         addChild(gameOverLabel)
         
@@ -44,7 +45,7 @@ class EndScene: SKScene {
         timeLabel.horizontalAlignmentMode = .left
         timeLabel.position = CGPoint(x: size.width*0.1 ,
                                      y: size.height*0.65 )
-        timeLabel.name = "timeLabel"
+        timeLabel.name = "timelabel"
         
         addChild(timeLabel)
         
@@ -55,7 +56,7 @@ class EndScene: SKScene {
         movesLabel.horizontalAlignmentMode = .left
         movesLabel.position = CGPoint(x: size.width*0.6,
                                      y: size.height*0.65 )
-        timeLabel.name = "movesLabel"
+        timeLabel.name = "moveslabel"
         
         addChild(movesLabel)
         
@@ -66,7 +67,7 @@ class EndScene: SKScene {
         bestLabel.horizontalAlignmentMode = .center
         bestLabel.position = CGPoint(x: self.size.width/2,
                                      y: self.size.height*0.55 )
-        bestLabel.name = "bestLabel"
+        bestLabel.name = "bestlabel"
         
         addChild(bestLabel)
         
@@ -98,7 +99,7 @@ class EndScene: SKScene {
         playAgainButton.fontColor = .white
         playAgainButton.horizontalAlignmentMode = .center
         playAgainButton.position = CGPoint(x: Int(size.width/2), y: Int(size.height*0.3 - 80))
-        playAgainButton.name = "playagian"
+        playAgainButton.name = "playagainbutton"
         
         addChild(playAgainButton)
         
@@ -113,10 +114,14 @@ class EndScene: SKScene {
         playAgainBoarder.name = "playagainboarder"
         
         addChild(playAgainBoarder)
-    }
-    
-    @objc func buttonAction() {
-      print("Button tapped")
+        
+        if GKLocalPlayer.local.isAuthenticated {
+            GKAccessPoint.shared.location = .topTrailing
+            GKAccessPoint.shared.showHighlights = true
+            GKAccessPoint.shared.isActive = true
+        } else {
+            print("Game Center not authenticated")
+        }
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {

@@ -10,20 +10,45 @@ import GameplayKit
 import AVFAudio
 import SwiftUI
 import UIKit
+import GameKit
+import StoreKit
 
 var movesCurrent: Int = 0
 var timeCurrent: String = ""
 var movesBest: Int = 0
 var timeBest: String = ""
 
-class GameScene: SKScene {
+class GameScene: SKScene, GKGameCenterControllerDelegate,
+                 SKProductsRequestDelegate, SKPaymentTransactionObserver {
     
+    private var sound: Bool = true
+    
+    private var leaderboardID: String = "elapsed_unscrambled"
+    private var productID: String = "coffee_unscrambled"
+    private var product: SKProduct?
+    
+    private var defaults: UserDefaults = UserDefaults.standard
+    
+    private let settingsButton: SKSpriteNode = SKSpriteNode(imageNamed: "gear")
     private var timeLabel: SKLabelNode = SKLabelNode()
     private var movesLabel: SKLabelNode = SKLabelNode()
     private var winLabel: SKLabelNode = SKLabelNode()
     private var okButton: SKLabelNode = SKLabelNode()
     private var okBoarder: SKShapeNode = SKShapeNode()
     
+    private let backButton: SKSpriteNode = SKSpriteNode(imageNamed: "back")
+    private var settingsLabel: SKLabelNode = SKLabelNode()
+    private var soundButton: SKLabelNode = SKLabelNode()
+    private var soundBoarder: SKShapeNode = SKShapeNode()
+    private var reviewButton: SKLabelNode = SKLabelNode()
+    private var reviewBoarder: SKShapeNode = SKShapeNode()
+    private var websiteButton: SKLabelNode = SKLabelNode()
+    private var websiteBoarder: SKShapeNode = SKShapeNode()
+    private var resetButton: SKLabelNode = SKLabelNode()
+    private var resetBoarder: SKShapeNode = SKShapeNode()
+    private var tipTheDevButton: SKLabelNode  = SKLabelNode()
+    private var tipTheDevBoarder: SKShapeNode = SKShapeNode()
+
     private let clr: [SKColor] = [ .white, .blue, .red, .green, .orange, .yellow, .clear ]
     private var color: [SKColor] = [SKColor]()
     
@@ -43,12 +68,17 @@ class GameScene: SKScene {
     
     private var soundPlayer: AVAudioPlayer? = AVAudioPlayer()
     
+    private var pauseTimer: Bool = false
     private var time: String = "00:00:00"
     private var moves: Int = 0
     private var timer: Timer = Timer()
     private var elapsed: Int = 0
     private var elapsedBest: Int = 0
-    private var once: Bool = false
+    private var onceStartTimer: Bool = false
+    
+    func gameCenterViewControllerDidFinish(_ gameCenterViewController: GKGameCenterViewController) {
+        gameCenterViewController.dismiss(animated: true, completion: nil)
+    }
     
     override func didMove(to view: SKView) {
         
@@ -66,6 +96,21 @@ class GameScene: SKScene {
         
         load()
         tiles()
+        fetchProducts()
+        
+        if GKLocalPlayer.local.isAuthenticated {
+            GKAccessPoint.shared.isActive = false
+        } else {
+            print("Game Center not authenticated")
+        }
+        
+        settingsButton.size.width = 30
+        settingsButton.size.height = 30
+        settingsButton.position.x = size.width - longButton
+        settingsButton.position.y = size.height - longButton
+        settingsButton.name = "settingsbutton"
+        
+        addChild(settingsButton)
         
         timeLabel.text = "Time: \(time)"
         timeLabel.fontName = "Bold"
@@ -88,19 +133,159 @@ class GameScene: SKScene {
         movesLabel.name = "moves"
         
         addChild(movesLabel)
-
         
+        shuffleBoard()
     }
-    override func update(_ currentTime: TimeInterval) {
-        if !once {
-            let seconds = 1.0
-            DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
-                self.shuffleBoard()
-                self.moves = 0
-                self.elapsedTime()
-            }
-            once = true
+    
+    func popOverSettings() {
+        
+        popOver = SKShapeNode(rect: CGRect(x: 0,
+                                           y: 0,
+                                           width: size.width,
+                                           height: size.height))
+        popOver.fillColor = .black
+        popOver.lineWidth = 0
+        popOver.zPosition = 3
+        
+        addChild(popOver)
+        
+        backButton.size.width = 30
+        backButton.size.height = 30
+        backButton.position.x = longButton
+        backButton.position.y = size.height - longButton
+        backButton.name = "backbutton"
+
+        popOver.addChild(backButton)
+        
+        settingsLabel.text = "Settings"
+        settingsLabel.fontName = "Bold"
+        settingsLabel.fontSize = 50
+        settingsLabel.fontColor = .white
+        settingsLabel.horizontalAlignmentMode = .center
+        settingsLabel.position = CGPoint(x: size.width/2,
+                                            y: size.height - long)
+        settingsLabel.name = "settingslabel"
+        
+        popOver.addChild(settingsLabel)
+        
+        if sound == true {
+            soundButton.text = "Sound: On"
+        } else {
+            soundButton.text = "Sound: Off"
         }
+        soundButton.fontName = "Bold"
+        soundButton.fontSize = 25
+        soundButton.fontColor = .white
+        soundButton.horizontalAlignmentMode = .center
+        soundButton.position = CGPoint(x: size.width/2 ,
+                                     y: size.height*0.75 )
+        soundButton.name = "soundbutton"
+        
+        popOver.addChild(soundButton)
+        
+        soundBoarder = SKShapeNode(rect: CGRect(x: Int(size.width/2 - 80),
+                                              y: Int(size.height*0.75 - 20),
+                                                    width: 160,
+                                                    height: 60),
+                                                    cornerRadius: 30)
+        soundBoarder.fillColor = .clear
+        soundBoarder.strokeColor = .white
+        soundBoarder.lineWidth = 2.5
+        soundBoarder.name = "soundboarder"
+        
+        popOver.addChild(soundBoarder)
+        
+        reviewButton.text = "Review App"
+        reviewButton.fontName = "Bold"
+        reviewButton.fontSize = 25
+        reviewButton.fontColor = .white
+        reviewButton.horizontalAlignmentMode = .center
+        reviewButton.position = CGPoint(x: size.width/2,
+                                     y: size.height*0.60 )
+        reviewButton.name = "reviewbutton"
+
+        popOver.addChild(reviewButton)
+        
+        reviewBoarder = SKShapeNode(rect: CGRect(x: Int(size.width/2 - 85),
+                                              y: Int(size.height*0.60 - 20),
+                                                    width: 170,
+                                                    height: 60),
+                                                    cornerRadius: 30)
+        reviewBoarder.fillColor = .clear
+        reviewBoarder.strokeColor = .white
+        reviewBoarder.lineWidth = 2.5
+        reviewBoarder.name = "reviewboarder"
+
+        popOver.addChild(reviewBoarder)
+        
+        websiteButton.text = "Website"
+        websiteButton.fontName = "Bold"
+        websiteButton.fontSize = 25
+        websiteButton.fontColor = .white
+        websiteButton.horizontalAlignmentMode = .center
+        websiteButton.position = CGPoint(x: size.width/2 ,
+                                     y: size.height*0.45 )
+        websiteButton.name = "websitebutton"
+
+        popOver.addChild(websiteButton)
+
+        websiteBoarder = SKShapeNode(rect: CGRect(x: Int(size.width/2 - 60),
+                                              y: Int(size.height*0.45 - 20),
+                                                    width: 125,
+                                                    height: 60),
+                                                    cornerRadius: 30)
+        websiteBoarder.fillColor = .clear
+        websiteBoarder.strokeColor = .white
+        websiteBoarder.lineWidth = 2.5
+        websiteBoarder.name = "websiteboarder"
+
+        popOver.addChild(websiteBoarder)
+        
+        resetButton.text = "Reset Progress"
+        resetButton.fontName = "Bold"
+        resetButton.fontSize = 25
+        resetButton.fontColor = .white
+        resetButton.horizontalAlignmentMode = .center
+        resetButton.position = CGPoint(x: size.width/2,
+                                     y: size.height*0.30 )
+        resetButton .name = "resetbutton"
+
+        popOver.addChild(resetButton )
+
+        resetBoarder = SKShapeNode(rect: CGRect(x: Int(size.width/2 - 105),
+                                              y: Int(size.height*0.30 - 20),
+                                                    width: 208,
+                                                    height: 60),
+                                                    cornerRadius: 30)
+        resetBoarder.fillColor = .clear
+        resetBoarder.strokeColor = .white
+        resetBoarder.lineWidth = 2.5
+        resetBoarder.name = "resetboarder"
+
+        popOver.addChild(resetBoarder)
+
+        tipTheDevButton.text = "Buy Me A Coffee"
+        tipTheDevButton.fontName = "Bold"
+        tipTheDevButton.fontSize = 25
+        tipTheDevButton.fontColor = .white
+        tipTheDevButton.horizontalAlignmentMode = .center
+        tipTheDevButton.position = CGPoint(x: size.width/2,
+                                       y: size.height*0.15 )
+        tipTheDevButton.name = "tipthedevbutton"
+
+        popOver.addChild(tipTheDevButton)
+
+        tipTheDevBoarder = SKShapeNode(rect: CGRect(x: Int(size.width/2 - 110),
+                                              y: Int(size.height*0.15 - 20),
+                                                    width: 220,
+                                                    height: 60),
+                                                    cornerRadius: 30)
+        tipTheDevBoarder.fillColor = .clear
+        tipTheDevBoarder.strokeColor = .white
+        tipTheDevBoarder.lineWidth = 2.5
+        tipTheDevBoarder.name = "tipthedevboarder"
+
+        popOver.addChild(tipTheDevBoarder)
     }
     
     func popOverDialogue() {
@@ -149,7 +334,24 @@ class GameScene: SKScene {
         
         popOver.addChild(okBoarder)
         
+    }
+    
+    func showResetAlert(withTitle title: String, message: String) {
+
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+
+        let yesAction = UIAlertAction(title: "Yes", style: .destructive) { _ in
+            let allKeys = NSUbiquitousKeyValueStore.default.dictionaryRepresentation.keys
+            for key in allKeys {
+                NSUbiquitousKeyValueStore.default.removeObject(forKey: key)
+            }
+        }
+        alertController.addAction(yesAction)
         
+        let noAction = UIAlertAction(title: "No", style: .cancel) { _ in }
+        alertController.addAction(noAction)
+        
+        view?.window?.rootViewController?.present(alertController, animated: true)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -162,6 +364,11 @@ class GameScene: SKScene {
             for i in 0..<numberOfTiles {
                 if touchedNode == overlay[i] && !isSolved() {
                     move(i: i)
+                    if !onceStartTimer {
+                        elapsedTime()
+                        onceStartTimer = true
+                    }
+                    pauseTimer = false
                 }
             }
             
@@ -174,6 +381,38 @@ class GameScene: SKScene {
             if touchedNode.name == "okboarder" {
                 okButton.fontColor = .gray
                 okBoarder.strokeColor = .gray
+            }
+            if touchedNode.name == "settingsbutton" && !isSolved() {
+                settingsButton.texture = SKTexture(imageNamed: "gear.fill")
+            }
+            if touchedNode.name == "backbutton" {
+                backButton.texture = SKTexture(imageNamed: "back.fill")
+            }
+            if touchedNode.name == "soundboarder" {
+                if sound == true {
+                    sound = false
+                    soundButton.text = "Sound: Off"
+                } else {
+                    sound = true
+                    soundButton.text = "Sound: On"
+                }
+                defaults.set(sound, forKey: "sound")
+            }
+            if touchedNode.name == "reviewboarder" {
+                reviewButton.fontColor = .gray
+                reviewBoarder.strokeColor = .gray
+            }
+            if touchedNode.name == "websiteboarder" {
+                websiteButton.fontColor = .gray
+                websiteBoarder.strokeColor = .gray
+            }
+            if touchedNode.name == "resetboarder" {
+                resetButton.fontColor = .gray
+                resetBoarder.strokeColor = .gray
+            }
+            if touchedNode.name == "tipthedevboarder" {
+                tipTheDevButton.fontColor = .gray
+                tipTheDevBoarder.strokeColor = .gray
             }
         }
     }
@@ -189,7 +428,93 @@ class GameScene: SKScene {
                 okButton.fontColor = .white
                 okBoarder.strokeColor = .white
                 
-                 changeScene()
+                 changeSceneEnd()
+            }
+            if touchedNode.name == "settingsbutton" && !isSolved() {
+                settingsButton.texture = SKTexture(imageNamed: "gear")
+                pauseTimer = true
+                popOverSettings()
+            }
+            if touchedNode.name == "backbutton" {
+                backButton.texture = SKTexture(imageNamed: "back")
+                popOver.removeFromParent()
+            }
+            if touchedNode.name == "reviewboarder" {
+                reviewButton.fontColor = .white
+                reviewBoarder.strokeColor = .white
+                
+                if let url = URL(string: "https://apps.apple.com/us/app/unscramble-colors/id1672406998") {
+                    UIApplication.shared.open(url)
+                }
+            }
+            if touchedNode.name == "websiteboarder" {
+                websiteButton.fontColor = .white
+                websiteBoarder.strokeColor = .white
+                
+                if let url = URL(string: "https://glassoniongames.com") {
+                    UIApplication.shared.open(url)
+                }
+            }
+            if touchedNode.name == "resetboarder" {
+                resetButton.fontColor = .white
+                resetBoarder.strokeColor = .white
+                
+                showResetAlert(withTitle: "Reset Progress", message: "All data will be erased!")
+            }
+            if touchedNode.name == "tipthedevboarder" {
+                tipTheDevButton.fontColor = .white
+                tipTheDevBoarder.strokeColor = .white
+                
+                guard let theProduct = product else {
+                    return
+                }
+                
+                if SKPaymentQueue.canMakePayments() {
+                    let payment = SKPayment(product: theProduct)
+                    SKPaymentQueue.default().add(self)
+                    SKPaymentQueue.default().add(payment)
+                }
+            }
+        }
+    }
+    
+    func fetchProducts() {
+        let request = SKProductsRequest(productIdentifiers: [productID])
+        request.delegate = self
+        request.start()
+    }
+    
+    func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
+        if let theProduct = response.products.first {
+            product = theProduct
+            print(product!.productIdentifier)
+            print(product!.price)
+            print(product!.localizedTitle)
+            print(product!.localizedDescription)
+        }
+    }
+    
+    func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
+        
+        for transaction in transactions {
+            switch transaction.transactionState {
+                
+            case .purchasing: // no op
+                break
+            case .purchased, .restored:
+                
+                SKPaymentQueue.default().finishTransaction(transaction)
+                SKPaymentQueue.default().remove(self)
+                
+                break
+            case .failed, .deferred:
+                
+                print("Transaction has failed")
+                
+                break
+            default: break
+                
+                
             }
         }
     }
@@ -262,9 +587,22 @@ class GameScene: SKScene {
         if elapsed <= elapsedBest {
             NSUbiquitousKeyValueStore().set(elapsed, forKey: "elapsedBest")
         }
+        if GKLocalPlayer.local.isAuthenticated {
+            GKLeaderboard.submitScore(elapsed, context: 0, player: GKLocalPlayer.local,
+            leaderboardIDs: [leaderboardID], completionHandler: {
+                error in
+                
+                if error != nil {
+                    print(error!)
+                } else {
+                    print("Time: \(self.elapsed) submitted")
+                }
+            })
+        }
     }
     
     func load() {
+        sound = defaults.bool(forKey: "sound")
         movesCurrent = Int(NSUbiquitousKeyValueStore().double(forKey: "movesCurrent"))
         timeCurrent = NSUbiquitousKeyValueStore().string(forKey: "timeCurrent") ?? ""
         movesBest = Int(NSUbiquitousKeyValueStore().double(forKey: "movesBest"))
@@ -273,22 +611,11 @@ class GameScene: SKScene {
     }
     
     func shuffleBoard() {
-        for _ in 0..<100000 {
-            let i = Int.random(in: 0..<numberOfTiles)
-            let empty: Int = findEmpty()
-            let emptyCol: Int = empty % cols
-            let emptyRow: Int = empty / cols
-            
-            // Double check valid move
-            if isNeighbor(i: i, x: emptyCol, y: emptyRow) {
-                animateSwap(fromIndex: i, toIndex: empty)
-            }
+        color.shuffle()
+        moves = 0
+        for i in 0..<numberOfTiles {
+            tile[i].fillColor = color[i]
         }
-        
-//        color.shuffle()
-//        for i in 0..<numberOfTiles {
-//            tile[i].fillColor = color[i]
-//        }
     }
     
     func elapsedTime() {
@@ -298,7 +625,7 @@ class GameScene: SKScene {
         if !timer.isValid {
             timer.fire()
             timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [self] timer in
-                elapsed += 1
+                if pauseTimer == false { elapsed += 1 }
                 time = createTimeString(seconds: elapsed)
                 timeLabel.text = "Time: \(time)"
             }
@@ -321,7 +648,7 @@ class GameScene: SKScene {
             soundPlayer = try AVAudioPlayer(contentsOf: url!)
             soundPlayer?.volume = 0.2
             soundPlayer?.prepareToPlay()
-            soundPlayer?.play()
+            if sound == true { soundPlayer?.play() }
         } catch let error {
             print(error.localizedDescription)
         }
@@ -333,13 +660,13 @@ class GameScene: SKScene {
             soundPlayer = try AVAudioPlayer(contentsOf: url!)
             soundPlayer?.volume = 1.0
             soundPlayer?.prepareToPlay()
-            soundPlayer?.play()
+            if sound == true { soundPlayer?.play() }
         } catch let error {
             print(error.localizedDescription)
         }
     }
     
-    func changeScene() {
+    func changeSceneEnd() {
         
         load()
         

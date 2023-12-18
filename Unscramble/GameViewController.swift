@@ -9,21 +9,35 @@
 import UIKit
 import SpriteKit
 import GameplayKit
+import GameKit
 
 var gameWidth: CGFloat = UIScreen.main.bounds.width
 var gameHeight: CGFloat = UIScreen.main.bounds.height
 var idiom: UIUserInterfaceIdiom { UIDevice.current.userInterfaceIdiom }
 var long: CGFloat = 50
+var longButton: CGFloat = 30
 
-class GameViewController: UIViewController {
+class GameViewController: UIViewController, GameKitHelperDelegate {
+    
+    private var currentGame: GameScene!
+    private var gameKitHelper: GameKitHelper!
+    
+    func didChangeAuthStatus(isAuthenticated: Bool) {
+        
+    }
 
+    func presentGameCenterAuth(viewController: UIViewController?) {
+        
+    }
     
     override func viewDidLoad() {
-        
-        
         super.viewDidLoad()
         
-        if gameHeight/gameWidth > 2 { long = 100 }
+        gameKitHelper = GameKitHelper()
+        gameKitHelper.delegate = self
+        gameKitHelper.authenticatePlayer()
+        
+        if gameHeight/gameWidth > 2 { long = 100; longButton = 50 }
         
         if idiom == .phone { gameWidth *= 1.0; gameHeight *= 1.0 }
         if idiom == .pad { gameWidth *= 0.6; gameHeight *= 0.6 }
@@ -69,6 +83,10 @@ class GameViewController: UIViewController {
     override var prefersStatusBarHidden: Bool {
         
         return true
+    }
+    
+    func gameCenterViewControllerDidFinish(_ gameCenterViewController: GKGameCenterViewController) {
+        gameCenterViewController.dismiss(animated: true, completion: nil)
     }
 }
 
